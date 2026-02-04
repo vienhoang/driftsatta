@@ -1,79 +1,125 @@
 # Säker Nätverksarkitektur — Gruppuppgift
 
-## Översikt (för lärare)
+## Scenario
 
-Denna uppgift simulerar ett överlämningsscenario där ett utvecklingsteam har byggt en applikation och ett DevOps-team ska driftsätta den med fokus på nätverkssäkerhet.
+Ett utvecklingsteam har byggt ett REST API för inventariehantering och lämnat över det till er — DevOps-teamet. Er uppgift är att driftsätta applikationen med fokus på **nätverkssäkerhet**, **lastbalansering** och **principen om minsta privilegium**.
 
-## Struktur
+## Repostruktur
 
 ```
 SoftwareDevopsTeam/
-├── app-repo/              ← Levereras till studenterna som den är
+├── app-repo/              ← Applikationen (rör inte denna kod)
 │   ├── app/               ← Flask-applikation med Dockerfile
 │   ├── db/                ← Databasschema
-│   └── README.md          ← "Från utvecklingsteamet"
+│   └── README.md          ← Dokumentation från utvecklingsteamet
 │
-└── infra-repo/            ← Studenterna forkar detta repo
-    ├── docker-compose.yml ← Skelett med TODO:er
-    ├── loadbalancer/      ← Skelett med TODO:er
-    ├── mariadb/           ← Skelett med TODO:er
-    ├── docs/              ← Uppgift, bedömning, ledtrådar
-    ├── README.md          ← Studenternas startpunkt
-    │
-    └── solution/          ← ENBART FÖR LÄRARE
-        ├── ...            ← Komplett fungerande lösning
-        ├── test.sh        ← Verifieringsskript
-        └── ANSWER_KEY.md  ← Lösningskommentarer
+└── infra-repo/            ← Här arbetar ni
+    ├── docker-compose.yml ← Skelett — fyll i TODO:erna
+    ├── loadbalancer/      ← Lastbalanserare (nftables)
+    ├── mariadb/           ← Databasinitiering
+    ├── docs/              ← Uppgiftsbeskrivning och ledtrådar
+    └── README.md          ← Detaljerade instruktioner
 ```
 
-## Distribuera till studenter
+## Kom igång
 
-1. **app-repo/** — Ge till alla grupper som den är (t.ex. som ett Git-repo)
-2. **infra-repo/** — Ge till studenterna **utan** `solution/`-katalogen
+1. **Läs** `app-repo/README.md` — förstå vad applikationen gör och behöver
+2. **Läs** `infra-repo/docs/ASSIGNMENT.md` — den fullständiga uppgiftsbeskrivningen
+3. **Arbeta** i `infra-repo/` — fyll i alla filer markerade med `TODO`
+4. **Testa** er lösning enligt instruktionerna i uppgiftsbeskrivningen
 
-```bash
-# Skapa en kopia utan lösningen
-rsync -av --exclude='solution' infra-repo/ infra-repo-student/
+## Viktiga filer
+
+| Fil | Beskrivning |
+|-----|-------------|
+| `app-repo/README.md` | API-dokumentation från utvecklingsteamet |
+| `infra-repo/docs/ASSIGNMENT.md` | Fullständig uppgiftsbeskrivning |
+| `infra-repo/docs/HINTS.md` | Ledtrådar (använd vid behov) |
+| `infra-repo/README.md` | Tekniska instruktioner |
+
+## Rapportera buggar och föreslå förbättringar
+
+Om ni hittar något som inte fungerar som förväntat — i applikationskoden, i skelettfilerna eller i dokumentationen — skapa en **Issue** i repot. Det är en viktig del av att arbeta med kod i team och i open source-projekt.
+
+### Varför issues?
+
+Issues är det primära sättet att kommunicera problem och idéer i ett projekt. En välskriven issue sparar tid för alla inblandade och visar att ni förstår problemet ni rapporterar.
+
+### Så skriver ni en bra issue
+
+En bra issue innehåller tillräckligt med information för att någon annan ska kunna **förstå problemet utan att fråga er**.
+
+**Titel:** Kort och beskrivande. Undvik vaga titlar som "Funkar inte".
+
+| Bra titel | Dålig titel |
+|-----------|-------------|
+| `app: /health returnerar 500 när databasen inte nåbar` | `Healthcheck trasig` |
+| `docker-compose: MariaDB startar inte med init.sql` | `Problem med databasen` |
+| `docs: HINTS.md ledtråd 3 saknar port i exempel` | `Fel i dokumentationen` |
+
+**Innehåll:** Strukturera er issue med följande delar:
+
+```markdown
+## Beskrivning
+Vad är problemet? Beskriv kort vad ni observerar.
+
+## Steg för att återskapa
+1. Kör `docker compose up -d --build`
+2. Vänta 15 sekunder
+3. Kör `curl http://localhost/items`
+4. Observera felmeddelandet
+
+## Förväntat beteende
+Vad borde ha hänt?
+
+## Faktiskt beteende
+Vad hände istället? Klistra in felmeddelanden och relevant output.
+
+## Miljö
+- OS: (t.ex. Ubuntu 22.04 / macOS 14 / Windows 11 + WSL2)
+- Docker version: (kör `docker --version`)
+- Docker Compose version: (kör `docker compose version`)
+
+## Egen analys
+Vad har ni undersökt? Vad tror ni orsaken är?
+Visa gärna vilka loggar ni tittat på (`docker logs <container>`).
+
+## Förslag på lösning (valfritt)
+Om ni har en idé på hur det kan lösas, beskriv den här.
 ```
 
-Alternativt, om ni använder Git:
+### Tips
 
-```bash
-# Lägg till solution/ i .gitignore innan studenterna får repot
-echo "solution/" >> infra-repo/.gitignore
-```
+- **Inkludera felmeddelanden** — Kopiera text, inte skärmdumpar av terminaltext
+- **Var specifik** — "Fungerar inte" säger ingenting. *Vad* fungerar inte, *när*, och *hur* märker ni det?
+- **Visa vad ni redan testat** — Det visar att ni försökt lösa det själva och hjälper andra undvika att föreslå saker ni redan provat
+- **En issue per problem** — Blanda inte flera orelaterade problem i samma issue
+- **Använd labels** om repot har dem — t.ex. `bug`, `documentation`, `enhancement`
 
-## Testa lösningen
+### Exempel på en komplett issue
 
-```bash
-cd infra-repo/solution
-docker compose up -d --build
-
-# Vänta ~15 sekunder på att MariaDB startar
-sleep 15
-
-# Kör verifieringsskriptet
-bash test.sh
-
-# Städa upp
-docker compose down -v
-```
-
-## Lärandemål
-
-Studenterna övar på:
-
-- **Nätverkssegmentering** med Docker-nätverk
-- **Brandväggsregler** med nftables
-- **Lastbalansering** med nftables DNAT
-- **Principen om minsta privilegium** (databasrättigheter)
-- **Docker Compose** med healthchecks, named volumes, IPAM
-- **Säkerhetstänk** — varför exponerar vi inte databasen?
+> **Titel:** `loadbalancer: nftables-regler laddas inte vid uppstart`
+>
+> **Beskrivning:**
+> Lastbalanseraren startar men vidarebefordrar ingen trafik. Curl mot port 80 ger "connection refused".
+>
+> **Steg för att återskapa:**
+> 1. `docker compose up -d --build`
+> 2. `curl http://localhost/items`
+> 3. Svar: `curl: (7) Failed to connect to localhost port 80`
+>
+> **Förväntat beteende:** Svar med JSON-data från en av appinstanserna.
+>
+> **Faktiskt beteende:** Connection refused.
+>
+> **Egen analys:**
+> Kollade loggar med `docker logs loadbalancer` — inga felmeddelanden. Körde `docker exec loadbalancer nft list ruleset` och fick tomt resultat, vilket tyder på att nftables.conf inte laddas. Misstänker att sökvägen i entrypoint.sh är fel.
+>
+> **Förslag:** Ändra sökvägen i entrypoint.sh från `/etc/nftables.conf` till `/etc/nftables/nftables.conf`.
 
 ## Förkunskaper
 
-Studenterna bör ha grundläggande kunskap om:
 - Docker och Docker Compose
-- Nätverksprotokoll (TCP/IP)
+- Grundläggande nätverkskunskap (TCP/IP, subnät)
 - SQL
 - Linux-kommandon

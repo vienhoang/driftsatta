@@ -18,9 +18,7 @@ infra-repo/
 ├── mariadb/
 │   └── init.sql                 ← Fyll i tabell, användare, rättigheter
 └── docs/
-    ├── ASSIGNMENT.md            ← Fullständig uppgiftsbeskrivning
-    ├── GRADING.md               ← Bedömningsmatris (G/VG)
-    └── HINTS.md                 ← Ledtrådar (använd vid behov)
+    └── ASSIGNMENT.md            ← Fullständig uppgiftsbeskrivning
 ```
 
 ## Kom igång
@@ -50,5 +48,3 @@ infra-repo/
 
 Se `docs/`-katalogen:
 - **ASSIGNMENT.md** — Fullständig uppgiftsbeskrivning med arkitekturdiagram
-- **GRADING.md** — Bedömningsmatris för G och VG
-- **HINTS.md** — Progressiva ledtrådar om ni kör fast
