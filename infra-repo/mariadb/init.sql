@@ -2,23 +2,38 @@
 -- Databasinitiering
 -- =============================================================
 
--- TODO: Skapa tabellen "items" med följande kolumner:
---   id          - INT, auto-increment, primärnyckel
---   name        - VARCHAR(255), NOT NULL
---   description - TEXT
---   created_at  - TIMESTAMP med standardvärde CURRENT_TIMESTAMP
+-- Skapa tabellen "items"
+CREATE TABLE IF NOT EXISTS items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
+-- Lägg in exempeldata
+INSERT INTO items (name, description) VALUES
+    ('Laptop', 'High-performance laptop for development work'),
+    ('Monitor', '27-inch 4K display with USB-C connectivity'),
+    ('Keyboard', 'Mechanical keyboard with RGB backlighting'),
+    ('Mouse', 'Wireless ergonomic mouse with precision tracking'),
+    ('Headphones', 'Noise-cancelling headphones for focused work');
 
--- TODO: Lägg in exempeldata (minst 3 rader)
--- INSERT INTO items (name, description) VALUES ...
+-- =============================================================
+-- Skapa applikationsanvändare med begränsade rättigheter
+-- =============================================================
+-- Principen om minsta privilegium: Ge endast de rättigheter som krävs
+-- Baserat på typiska API-operationer (CRUD utan DELETE):
+-- - SELECT: Läsa/lista items
+-- - INSERT: Skapa nya items
+-- - UPDATE: Uppdatera befintliga items
+-- (DELETE utelämnas om applikationen inte ska kunna radera data)
 
+CREATE USER IF NOT EXISTS 'app_user'@'%' IDENTIFIED BY 'cHX@6osY2OpV7p';
 
--- TODO: Skapa en databasanvändare för applikationen
--- Användaren ska ha BEGRÄNSADE rättigheter (principen om minsta privilegium)
--- Tips: Fundera på vilka SQL-operationer applikationen faktiskt behöver.
---       Vilka operationer stöder API:et? (Titta på endpoints i app-repo)
---       Behöver applikationen kunna radera data?
---
--- CREATE USER IF NOT EXISTS 'app_user'@'%' IDENTIFIED BY '...';
--- GRANT ... ON app_db.* TO 'app_user'@'%';
--- FLUSH PRIVILEGES;
+-- Ge endast nödvändiga rättigheter på appdb-databasen
+GRANT SELECT, INSERT, UPDATE ON appdb.* TO 'app_user'@'%';
+
+-- Om applikationen även behöver DELETE-funktionalitet, lägg till:
+-- GRANT DELETE ON appdb.* TO 'app_user'@'%';
+
+FLUSH PRIVILEGES;

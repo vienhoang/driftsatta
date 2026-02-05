@@ -2,3 +2,24 @@ infra-repo/solution/
 .claude
 infra-repo/docs/GRADING.md
 README.instructor.md
+
+# Ignore .env with database pwds
+.env
+
+# Ignore docker
+.docker/
+
+# Ignore OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore backup
+*.backup
+*.bak
+backup-*/
+*.sql
+backups/
+
+# Ignore setup
+setup.txt

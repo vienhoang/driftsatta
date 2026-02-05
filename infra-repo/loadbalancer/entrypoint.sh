@@ -1,19 +1,15 @@
 #!/bin/sh
-
 # =============================================================
 # Startskript för lastbalanseraren
 # =============================================================
 
-# TODO: Aktivera IP-forwarding
-# Tips: Skriv värdet 1 till /proc/sys/net/ipv4/ip_forward
-# echo ...
+# IP-forwarding är redan aktiverat via sysctls i docker-compose.yml
+# så vi behöver inte sätta det här
 
-# TODO: Ladda nftables-konfigurationen
-# Tips: Använd "nft -f" med sökvägen till konfigurationsfilen
-# nft ...
+# Ladda nftables-konfigurationen
+nft -f /etc/nftables.conf
 
 echo "Lastbalanserare startad."
 
-# TODO: Håll containern igång
-# Tips: Containern avslutas om denna process avslutas.
-# Använd ett kommando som körs för evigt, t.ex. tail -f /dev/null
+# Håll containern igång
+tail -f /dev/null

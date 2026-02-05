@@ -13,6 +13,15 @@ services:
     build: ./loadbalancer
     container_name: loadbalancer
     # TODO: Lägg till ports, cap_add, sysctls, networks
+    ports:
+      - "80:80"
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      frontend:
+        ipv4_address: 172.20.0.10
     depends_on:
       - app1
       - app2
@@ -33,11 +42,36 @@ services:
     build: ../app-repo/app
     container_name: app1
     # TODO: Lägg till environment, networks, depends_on
-
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    networks:
+      frontend:
+        ipv4_address: 172.20.0.11
+      backend:
+    depends_on:
+      mariadb:
+        condition: service_healthy
   app2:
     build: ../app-repo/app
     container_name: app2
     # TODO: Lägg till environment, networks, depends_on
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    networks:
+      frontend:
+        ipv4_address: 172.20.0.12
+      backend:
+    depends_on:
+      mariadb:
+        condition: service_healthy
 
   # =============================================================
   # DATABAS
@@ -54,6 +88,20 @@ services:
     image: mariadb:10
     container_name: mariadb
     # TODO: Lägg till environment, volumes, networks, healthcheck
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+    volumes: 
+      - ./mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 # =============================================================
 # NÄTVERK
@@ -65,11 +113,19 @@ services:
 # Tänk på: Vilka tjänster ska vara på vilka nätverk?
 # Databasen ska INTE vara nåbar från lastbalanseraren.
 # =============================================================
-# networks:
+networks:
+  frontend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+  backend:
+    driver: bridge
 
 # =============================================================
 # VOLYMER
 # =============================================================
 # TODO: Definiera named volume för databaslagring
 # =============================================================
-# volumes:
+volumes: 
+  mariadb_data:
